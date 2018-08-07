@@ -5,8 +5,7 @@ import os
 from fastly.connection import Connection
 from fastly.auth import KeyAuthenticator, SessionAuthenticator
 from fastly.errors import AuthenticationError
-from fastly.models import Service, Version, Domain, Backend, Settings, Condition, Header
-
+from fastly.models import Service, ServiceAPI, Version, Domain, Backend, Settings, Condition, Header
 
 class API(object):
     def __init__(self, host=os.environ.get('FASTLY_HOST', 'api.fastly.com'), secure=os.environ.get('FASTLY_SECURE', True), port=None, root='',
@@ -27,6 +26,12 @@ class API(object):
 
     def service(self, id):
         return Service.find(self.conn, id=id)
+
+    def serviceDetails(self, service_id):
+        return ServiceAPI.find(self.conn, pattrn='/%s/details' % service_id)
+
+    def serviceSearch(self, service_name):
+        return ServiceAPI.find(self.conn, pattrn='/search?name=%s' % service_name)
 
     def version(self, service_id, version):
         return Version.find(self.conn, service_id=service_id, number=version)

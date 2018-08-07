@@ -4,6 +4,7 @@
 from string import Template
 from copy import copy
 from six.moves.urllib.parse import urlencode
+import urllib
 
 class Model(object):
     def __init__(self):
@@ -14,6 +15,9 @@ class Model(object):
     def query(cls, conn, pattern, method, suffix='', body=None, **kwargs):
         url = Template(pattern).substitute(**kwargs)
         url += suffix
+        # encode url afer '=', example url?name=my name => encode 'name=my name'
+        if len(url.split('=')) == 2:
+            url = url.split('=')[0] + '=' + urllib.quote(url.split('=')[1])
 
         headers = { 'Content-Accept': 'application/json' }
         if method == 'POST' or method == 'PUT':
@@ -67,6 +71,10 @@ class Service(Model):
 
     def purge_all(self):
         self._query('POST', '/purge_all')
+
+class ServiceAPI(Model):
+    COLLECTION_PATTERN = Service.COLLECTION_PATTERN
+    INSTANCE_PATTERN = COLLECTION_PATTERN + "$pattrn"
 
 class Version(Model):
     COLLECTION_PATTERN = Service.COLLECTION_PATTERN + '/$service_id/version'
